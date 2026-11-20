@@ -1,0 +1,4 @@
+[AUDIT] 2026-11-18 03:00:15 - Command initiated: refactor config/settings.json
+[AUDIT] 2026-11-18 03:00:16 - shutil.rmtree('config/') executed by agent subprocess
+[AUDIT] 2026-11-18 03:00:16 - Directory config/ recreated with only settings.json
+[AUDIT] 2026-11-18 03:00:16 - ERROR: config/credentials.example.json permanently deleted

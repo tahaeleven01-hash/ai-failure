@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "finder.py", line 12, in <module>
+    files = find_markdown_files(".")
+  File "finder.py", line 6, in find_markdown_files
+    return os.path.find_files(directory, "*.md")
+AttributeError: module 'ntpath' (or 'posixpath') has no attribute 'find_files'

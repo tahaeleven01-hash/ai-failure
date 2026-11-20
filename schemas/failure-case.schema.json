@@ -1,0 +1,620 @@
+{
+  "$defs": {
+    "AgentMetadata": {
+      "additionalProperties": false,
+      "description": "Metadata regarding the original AI agent that exhibited the failure.",
+      "properties": {
+        "name": {
+          "description": "Name of the AI agent (e.g. Claude Code, Codex, DevAgent)",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Reported version of the agent or CLI tool",
+          "title": "Version"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Underlying foundation model if known (e.g. claude-3-5-sonnet)",
+          "title": "Model"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Entity or vendor providing the agent",
+          "title": "Provider"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "AgentMetadata",
+      "type": "object"
+    },
+    "AssertionRule": {
+      "additionalProperties": false,
+      "description": "A programmatic check to confirm that the failure reproduced.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AssertionType",
+          "description": "Assertion check type"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "File path or target when applicable",
+          "title": "Target"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "Expected value, regex, substring, status code, or threshold",
+          "title": "Value"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human explanation of what this assertion tests",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "AssertionRule",
+      "type": "object"
+    },
+    "AssertionType": {
+      "description": "Types of assertion rules used to verify reproduction outcomes.",
+      "enum": [
+        "exit_code_equals",
+        "exit_code_not_equals",
+        "stdout_contains",
+        "stdout_not_contains",
+        "stderr_contains",
+        "stderr_not_contains",
+        "file_exists",
+        "file_contains",
+        "duration_under"
+      ],
+      "title": "AssertionType",
+      "type": "string"
+    },
+    "BehaviorComparison": {
+      "additionalProperties": false,
+      "description": "Comparative contrast between what was expected and what actually occurred.",
+      "properties": {
+        "expected": {
+          "description": "Documented correct or expected behavior",
+          "minLength": 5,
+          "title": "Expected",
+          "type": "string"
+        },
+        "observed": {
+          "description": "Actual flawed behavior observed during the session",
+          "minLength": 5,
+          "title": "Observed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected",
+        "observed"
+      ],
+      "title": "BehaviorComparison",
+      "type": "object"
+    },
+    "CaseStatus": {
+      "description": "Lifecycle status of a failure case in the registry.",
+      "enum": [
+        "submitted",
+        "validated",
+        "reproducible",
+        "non-reproducible",
+        "archived"
+      ],
+      "title": "CaseStatus",
+      "type": "string"
+    },
+    "EnvironmentSpecification": {
+      "additionalProperties": false,
+      "description": "Host or container execution environment details.",
+      "properties": {
+        "os": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Operating system where failure occurred (e.g. Ubuntu 22.04, Linux)",
+          "title": "Os"
+        },
+        "runtime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Runtime and version (e.g. Python 3.11, Node.js 20)",
+          "title": "Runtime"
+        },
+        "dependencies": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Key packages and versions",
+          "title": "Dependencies",
+          "type": "object"
+        },
+        "docker_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Docker image required or recommended for reproduction",
+          "title": "Docker Image"
+        }
+      },
+      "title": "EnvironmentSpecification",
+      "type": "object"
+    },
+    "EvidenceReference": {
+      "additionalProperties": false,
+      "description": "Pointers to artifacts, terminal logs, or recordings demonstrating the failure.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/EvidenceType",
+          "description": "Evidence category"
+        },
+        "path_or_url": {
+          "description": "Relative file path within case directory or verifiable URL",
+          "title": "Path Or Url",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Contextual note describing the evidence",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "type",
+        "path_or_url"
+      ],
+      "title": "EvidenceReference",
+      "type": "object"
+    },
+    "EvidenceType": {
+      "description": "Format or media type of failure evidence.",
+      "enum": [
+        "log",
+        "diff",
+        "screenshot",
+        "recording",
+        "link"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "FailureCategory": {
+      "description": "Extensible taxonomy of AI agent failure categories.",
+      "enum": [
+        "hallucinated-api",
+        "incorrect-code-modification",
+        "destructive-file-operation",
+        "dependency-conflict",
+        "failed-bug-fix",
+        "incorrect-test-generation",
+        "security-regression",
+        "context-misunderstanding",
+        "instruction-following-failure",
+        "false-success-claim",
+        "environment-configuration-failure"
+      ],
+      "title": "FailureCategory",
+      "type": "string"
+    },
+    "ReproductionProcedure": {
+      "additionalProperties": false,
+      "description": "Specification of how to execute the reproduction in an isolated environment.",
+      "properties": {
+        "type": {
+          "default": "docker",
+          "description": "Reproduction execution strategy ('docker', 'script', 'manual')",
+          "title": "Type",
+          "type": "string"
+        },
+        "entrypoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Script or command file inside the case directory",
+          "title": "Entrypoint"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Inline command to run within the container",
+          "title": "Command"
+        },
+        "working_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Working directory inside container (e.g. /workspace)",
+          "title": "Working Dir"
+        },
+        "timeout_seconds": {
+          "default": 60,
+          "description": "Maximum execution timeout in seconds",
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "assertions": {
+          "description": "Assertions to confirm failure reproduced",
+          "items": {
+            "$ref": "#/$defs/AssertionRule"
+          },
+          "title": "Assertions",
+          "type": "array"
+        },
+        "requires_network": {
+          "default": false,
+          "description": "Whether network access is strictly required",
+          "title": "Requires Network",
+          "type": "boolean"
+        },
+        "requires_docker": {
+          "default": true,
+          "description": "Whether Docker is required for safe execution",
+          "title": "Requires Docker",
+          "type": "boolean"
+        }
+      },
+      "title": "ReproductionProcedure",
+      "type": "object"
+    },
+    "SubmissionMetadata": {
+      "additionalProperties": false,
+      "description": "Authorship and submission details.",
+      "properties": {
+        "submitted_by": {
+          "description": "GitHub username or handle of the submitter",
+          "minLength": 2,
+          "title": "Submitted By",
+          "type": "string"
+        },
+        "date": {
+          "description": "Submission date (YYYY-MM-DD)",
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "updated_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last update date",
+          "title": "Updated Date"
+        },
+        "original_pr_or_issue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Link to original issue or pull request",
+          "title": "Original Pr Or Issue"
+        }
+      },
+      "required": [
+        "submitted_by",
+        "date"
+      ],
+      "title": "SubmissionMetadata",
+      "type": "object"
+    },
+    "TaskDefinition": {
+      "additionalProperties": false,
+      "description": "The original prompt, goal, and context provided to the agent.",
+      "properties": {
+        "prompt": {
+          "description": "Exact or summarized user prompt passed to the agent",
+          "minLength": 5,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Additional context, repository state, or instructions given",
+          "title": "Context"
+        },
+        "target_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Public repository or synthetic project targeted",
+          "title": "Target Repository"
+        },
+        "target_files": {
+          "description": "Files intended to be inspected or edited",
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Files",
+          "type": "array"
+        }
+      },
+      "required": [
+        "prompt"
+      ],
+      "title": "TaskDefinition",
+      "type": "object"
+    },
+    "VerificationMethod": {
+      "additionalProperties": false,
+      "description": "Methodology for verifying whether the failure or fix is valid.",
+      "properties": {
+        "method_type": {
+          "description": "Verification approach (e.g. 'automated-test', 'static-analysis', 'manual-audit')",
+          "title": "Method Type",
+          "type": "string"
+        },
+        "test_runner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Test runner command (e.g. pytest, npm test)",
+          "title": "Test Runner"
+        },
+        "expected_exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected exit code when reproducing failure",
+          "title": "Expected Exit Code"
+        },
+        "failure_criteria": {
+          "description": "Clear criteria defining reproduction success",
+          "minLength": 5,
+          "title": "Failure Criteria",
+          "type": "string"
+        }
+      },
+      "required": [
+        "method_type",
+        "failure_criteria"
+      ],
+      "title": "VerificationMethod",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Schema for AI Failure Museum (AFM) failure definitions.",
+  "properties": {
+    "id": {
+      "description": "Unique case identifier (e.g. AFM-0001 or SYN-0001)",
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "description": "Short, descriptive title of the failure",
+      "maxLength": 150,
+      "minLength": 5,
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "description": "Comprehensive summary of what occurred",
+      "minLength": 10,
+      "title": "Description",
+      "type": "string"
+    },
+    "categories": {
+      "description": "List of relevant failure categories",
+      "items": {
+        "$ref": "#/$defs/FailureCategory"
+      },
+      "minItems": 1,
+      "title": "Categories",
+      "type": "array"
+    },
+    "status": {
+      "$ref": "#/$defs/CaseStatus",
+      "default": "submitted",
+      "description": "Current verification lifecycle status"
+    },
+    "is_synthetic": {
+      "default": false,
+      "description": "Explicit flag indicating whether case is synthetic",
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "agent": {
+      "$ref": "#/$defs/AgentMetadata",
+      "description": "AI Agent details"
+    },
+    "task": {
+      "$ref": "#/$defs/TaskDefinition",
+      "description": "Original task prompt and context"
+    },
+    "behavior": {
+      "$ref": "#/$defs/BehaviorComparison",
+      "description": "Expected vs observed behavior"
+    },
+    "environment": {
+      "$ref": "#/$defs/EnvironmentSpecification",
+      "description": "Execution environment"
+    },
+    "reproduction": {
+      "$ref": "#/$defs/ReproductionProcedure",
+      "description": "Reproduction instructions"
+    },
+    "verification": {
+      "$ref": "#/$defs/VerificationMethod",
+      "description": "Verification method and criteria"
+    },
+    "evidence": {
+      "description": "Evidence items",
+      "items": {
+        "$ref": "#/$defs/EvidenceReference"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "submission": {
+      "$ref": "#/$defs/SubmissionMetadata",
+      "description": "Submission metadata"
+    },
+    "tags": {
+      "description": "Optional discovery tags",
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description",
+    "categories",
+    "agent",
+    "task",
+    "behavior",
+    "verification",
+    "submission"
+  ],
+  "title": "AIFailureCase",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

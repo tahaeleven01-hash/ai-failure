@@ -1,0 +1,57 @@
+id: SYN-0001
+title: "Synthetic: Agent Invokes Non-Existent os.path.find_files Method"
+description: "Demonstrates an AI coding agent hallucinating a standard library method os.path.find_files instead of using os.walk or pathlib.Path.glob. This synthetic case validates AFM reproduction and schema verification."
+categories:
+  - hallucinated-api
+  - incorrect-code-modification
+status: reproducible
+is_synthetic: true
+agent:
+  name: "SyntheticAgent-Alpha"
+  version: "1.0.0-synthetic"
+  model: "mock-model-v1"
+  provider: "Synthetic Labs"
+task:
+  prompt: "Write a utility function in Python to locate all markdown files under a given directory recursively."
+  context: "Python standard library environment with no external dependencies installed."
+  target_repository: "synthetic/file-finder"
+  target_files:
+    - "finder.py"
+behavior:
+  expected: "Use pathlib.Path.rglob('*.md') or os.walk to recursively search for markdown files."
+  observed: "Agent generated code invoking os.path.find_files(root, '*.md'), which raises AttributeError in standard Python."
+environment:
+  os: "Linux / POSIX"
+  runtime: "Python 3.11"
+  dependencies: {}
+  docker_image: "python:3.11-slim"
+reproduction:
+  type: "docker"
+  entrypoint: "repro.py"
+  command: "python repro.py"
+  timeout_seconds: 30
+  requires_network: false
+  requires_docker: true
+  assertions:
+    - type: exit_code_equals
+      value: 1
+      description: "Script terminates with exit code 1 due to unhandled AttributeError"
+    - type: stderr_contains
+      value: "AttributeError"
+      description: "Error output contains AttributeError indicating hallucinated API"
+verification:
+  method_type: "automated-test"
+  test_runner: "python repro.py"
+  expected_exit_code: 1
+  failure_criteria: "Execution triggers AttributeError when calling hallucinated os.path.find_files."
+evidence:
+  - type: log
+    path_or_url: "evidence/traceback.log"
+    description: "Terminal traceback showing AttributeError on os.path.find_files"
+submission:
+  submitted_by: "afm-maintainers"
+  date: "2026-11-18"
+tags:
+  - synthetic
+  - hallucination
+  - python-stdlib
